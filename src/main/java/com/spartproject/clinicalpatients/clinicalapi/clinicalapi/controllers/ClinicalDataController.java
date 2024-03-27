@@ -1,10 +1,9 @@
 package com.spartproject.clinicalpatients.clinicalapi.clinicalapi.controllers;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
+import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.exeption.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.bind.annotation.PostMapping;
 
 import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.dto.ClinicalDataRequest;
 import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.models.ClinicalData;
@@ -12,16 +11,13 @@ import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.models.Patient;
 import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.repos.ClinicalDataRepository;
 import com.spartproject.clinicalpatients.clinicalapi.clinicalapi.repos.PatientRepository;
 
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
 @RequestMapping("/clinicaldata")
+@CrossOrigin(origins = "*")
 public class ClinicalDataController {
 
     @Autowired
@@ -41,11 +37,18 @@ public class ClinicalDataController {
     }
 
     @GetMapping("/{id}")
-    public ClinicalData getClinicalDataById(@PathVariable Long id) {
-        return clinicalDataRepository.findById(id)
-                .orElseThrow(() -> {
-                    throw new RuntimeException("Patient not found with id " + id);
-                });
+//    public ClinicalData getClinicalDataById(@PathVariable Long id) {
+//        return clinicalDataRepository.findById(id)
+    public ResponseEntity<List<ClinicalData>> getClinicalDataByPatientId(@PathVariable Long id) {
+        try {
+            List<ClinicalData> clinicalDataList = clinicalDataRepository.findByPatientId(id);
+            if (clinicalDataList.isEmpty()) {
+                throw new ResourceNotFoundException("Clinical data not found for patient " + id);
+            };
+            return new ResponseEntity<>(clinicalDataList, HttpStatus.OK);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @PutMapping("/{id}")
