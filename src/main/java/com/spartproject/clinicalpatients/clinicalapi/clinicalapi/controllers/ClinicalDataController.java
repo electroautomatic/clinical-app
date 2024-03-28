@@ -37,19 +37,11 @@ public class ClinicalDataController {
     }
 
     @GetMapping("/{id}")
-//    public ClinicalData getClinicalDataById(@PathVariable Long id) {
-//        return clinicalDataRepository.findById(id)
     public ResponseEntity<List<ClinicalData>> getClinicalDataByPatientId(@PathVariable Long id) {
-        try {
-            List<ClinicalData> clinicalDataList = clinicalDataRepository.findByPatientId(id);
-            if (clinicalDataList.isEmpty()) {
-                throw new ResourceNotFoundException("Clinical data not found for patient " + id);
-            };
-            return new ResponseEntity<>(clinicalDataList, HttpStatus.OK);
-        } catch (ResourceNotFoundException e) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
+        List<ClinicalData> clinicalDataList = clinicalDataRepository.findByPatientId(id);
+        return new ResponseEntity<>(clinicalDataList, HttpStatus.OK);
     }
+
 
     @PutMapping("/{id}")
     public ClinicalData updateClinicalData(@PathVariable Long id, @RequestBody ClinicalData clinicalDataDetails) {
